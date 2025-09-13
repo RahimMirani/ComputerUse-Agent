@@ -19,8 +19,13 @@ def execute_command(command: str) -> str:
 if __name__ == "__main__":
     # For Windows, 'dir' lists directory contents. For macOS/Linux, it's 'ls'.
     # You can change this to any command you like.
-    user_input = input("Enter a command:")
-    output = execute_command(user_input)
-    print(output)
+    while True:
+        user_input = input("Enter a command:")
+        if user_input == "exit" or user_input == "quit":
+            break
+        output = execute_command(user_input)
+        print(output)
+        
+        
 
 
