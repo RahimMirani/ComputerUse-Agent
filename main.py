@@ -2,6 +2,7 @@ import subprocess
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
+import json
 
 # Load environment variables from .env file
 load_dotenv()
@@ -10,29 +11,35 @@ load_dotenv()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-def get_command_from_llm(user_input: str) -> str:
+def get_agent_action(user_input: str) -> dict:
     """
-    Uses the Gemini LLM to translate natural language into a shell command.
+    Uses the Gemini LLM to determine the user's intent and required action.
     """
-    # We can improve this prompt over time.
     prompt = f"""
-    You are an expert in command-line interfaces. A user will provide a task in natural language.
-    Your sole responsibility is to return a single, executable shell command that accomplishes the task.
+    You are a helpful AI assistant that controls a computer.
+    Based on the user's request, determine whether the task requires a 'SHELL' command or a 'GUI' action.
+
     The user is on the following operating system: {os.name}.
-    Do not provide any explanation, clarification, or conversational text.
-    Only return the shell command.
+
+    Respond with a JSON object containing two keys:
+    1. "type": Must be either "SHELL" or "GUI".
+    2. "command": 
+       - If the type is "SHELL", this should be the executable shell command.
+       - If the type is "GUI", this should be a short, one-sentence description of the task to perform on the GUI.
+
+    Do not provide any explanation or conversational text. Only return the JSON object.
 
     User's request: "{user_input}"
-    Command:
     """
     
     try:
         response = model.generate_content(prompt)
-        # We'll do more robust parsing later if needed.
-        command = response.text.strip()
-        return command
+        # Clean up the response to ensure it's valid JSON
+        json_str = response.text.strip().replace('```json', '').replace('```', '').strip()
+        action = json.loads(json_str)
+        return action
     except Exception as e:
-        return f"Error communicating with the LLM: {e}"
+        return {"type": "ERROR", "command": f"Error parsing LLM response: {e}"}
 
 
 ## Function to execute and run commands in the terminal/shell
@@ -52,19 +59,32 @@ def execute_command(command: str) -> str:
     except subprocess.CalledProcessError as e:
         return f"Error executing command: {e}\n{e.stderr}"
 
+
+
+
 if __name__ == "__main__":
     while True:
         user_input = input("Hello, how can I help you today? ")
         if user_input.lower() in ["exit", "quit"]:
             break
         
-        # Get the command from the LLM
-        command_to_execute = get_command_from_llm(user_input)
-        print(f"Executing: {command_to_execute}")
+        # Get the structured action from the LLM
+        action = get_agent_action(user_input)
 
-        # Execute the command
-        output = execute_command(command_to_execute)
-        print(output)
+        if action.get("type") == "SHELL":
+            command_to_execute = action.get("command", "")
+            print(f"Executing shell command: {command_to_execute}")
+            output = execute_command(command_to_execute)
+            print(output)
+        elif action.get("type") == "GUI":
+            gui_task = action.get("command", "")
+            print(f"Recognized GUI task: {gui_task}")
+            # We will implement the GUI control logic in the next step.
+            print("GUI control is not yet implemented.")
+        elif action.get("type") == "ERROR":
+            print(f"Error: {action.get('command')}")
+        else:
+            print(f"Unknown action type: {action.get('type')}")
 
 
 
