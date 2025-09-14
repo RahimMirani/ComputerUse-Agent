@@ -34,6 +34,8 @@ def get_command_from_llm(user_input: str) -> str:
     except Exception as e:
         return f"Error communicating with the LLM: {e}"
 
+
+## Function to execute and run commands in the terminal/shell
 def execute_command(command: str) -> str:
     """
     Executes a shell command and returns its output.
@@ -52,7 +54,7 @@ def execute_command(command: str) -> str:
 
 if __name__ == "__main__":
     while True:
-        user_input = input("Enter a command:")
+        user_input = input("Hello, how can I help you today? ")
         if user_input.lower() in ["exit", "quit"]:
             break
         
