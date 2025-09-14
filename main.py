@@ -102,6 +102,7 @@ if __name__ == "__main__":
                 should_continue = execute_gui_action(next_action_str)
                 if not should_continue:
                     break # The LLM signaled that the task is done
+                time.sleep(0.5) # Add a small delay after the action
             
         elif action.get("type") == "ERROR":
             print(f"Error: {action.get('command')}")

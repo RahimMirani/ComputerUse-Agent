@@ -19,7 +19,7 @@ def get_next_gui_action(user_prompt: str, screenshot_file: str, history: list[st
     history_str = "\n".join(f"- {h}" for h in history)
     
     prompt = f"""
-    You are a helpful AI assistant that controls a computer.
+    You are a helpful AI assistant that controls a computer. Your goal is to complete the user's request by breaking it down into simple, single-step actions.
     You are looking at a screenshot of the user's screen.
     The user's overall goal is: "{user_prompt}"
 
@@ -27,12 +27,15 @@ def get_next_gui_action(user_prompt: str, screenshot_file: str, history: list[st
 {history_str}
 
     Based on the screenshot and your past actions, what is the single next action you should take to progress towards the goal?
+    Be very explicit. Do not make assumptions about the current state of the screen (e.g., which window is focused). 
+    For example, if you need to type in a text box, you must first output the action to click on that box to focus it.
+
     If you believe the goal is complete, use the done() action. Do not repeat actions that did not work.
 
     Your available actions are:
-    1. click(x, y): Click a specific coordinate on the screen.
-    2. type("text to type"): Type out a string of text. Use this for input fields.
-    3. press("key"): Press a special key on the keyboard (e.g., "enter", "win", "esc").
+    1. click(x, y): Click a specific coordinate on the screen. This is required before typing into a text field.
+    2. type("text to type"): Type out a string of text into the currently focused input.
+    3. press("key"): Press a special key on the keyboard (e.g., "enter", "win", "esc"). Use "win" for the Windows/Super key.
     4. done(): Use this when the user's goal has been fully achieved.
 
     Analyze the screenshot and your action history, then return ONLY the single command for the next action.
