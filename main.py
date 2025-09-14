@@ -3,6 +3,7 @@ import os
 import google.generativeai as genai
 from dotenv import load_dotenv
 import json
+from gui_controller import take_screenshot
 
 # Load environment variables from .env file
 load_dotenv()
@@ -80,7 +81,8 @@ if __name__ == "__main__":
             gui_task = action.get("command", "")
             print(f"Recognized GUI task: {gui_task}")
             # We will implement the GUI control logic in the next step.
-            print("GUI control is not yet implemented.")
+            take_screenshot()
+            print("I have taken a screenshot. Now I need to figure out what to do next.")
         elif action.get("type") == "ERROR":
             print(f"Error: {action.get('command')}")
         else:
