@@ -4,7 +4,7 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 import json
 import time
-from gui_controller import take_screenshot, get_next_gui_action, execute_gui_action
+from gui_controller import take_screenshot, get_next_gui_action, execute_gui_action, test_mouse_control
 
 # Load environment variables from .env file
 load_dotenv()
@@ -65,6 +65,9 @@ def execute_command(command: str) -> str:
 
 
 if __name__ == "__main__":
+    # Run a quick test to see if we can control the mouse
+    test_mouse_control()
+
     while True:
         user_input = input("Hello, how can I help you today? ")
         if user_input.lower() in ["exit", "quit"]:

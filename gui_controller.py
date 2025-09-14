@@ -64,13 +64,19 @@ def execute_gui_action(action_string: str) -> bool:
             # A bit of parsing to extract coordinates. This can be made more robust.
             coords_str = action_string[action_string.find("(")+1:action_string.find(")")]
             x, y = map(int, coords_str.split(','))
+            print(f"  Attempting to click at ({x}, {y})...")
             pyautogui.click(x, y)
+            print("  Click successful.")
         elif action_string.lower().startswith("type"):
             text_to_type = action_string[action_string.find("(")+1:action_string.find(")")].strip('"\'')
+            print(f"  Attempting to type: '{text_to_type}'...")
             pyautogui.typewrite(text_to_type, interval=0.1)
+            print("  Typing successful.")
         elif action_string.lower().startswith("press"):
             key_to_press = action_string[action_string.find("(")+1:action_string.find(")")].strip('"\'')
+            print(f"  Attempting to press key: '{key_to_press}'...")
             pyautogui.press(key_to_press)
+            print("  Key press successful.")
         elif action_string.lower() == "done()":
             print("Task complete.")
             return False # Signal to stop the loop
@@ -81,6 +87,34 @@ def execute_gui_action(action_string: str) -> bool:
         print(f"Error executing action '{action_string}': {e}")
 
     return True # Signal to continue the loop
+
+def test_mouse_control():
+    """
+    A simple test to see if pyautogui can control the mouse.
+    """
+    print("\n--- Running PyAutoGUI Test ---")
+    try:
+        # Disable failsafe for this test
+        pyautogui.FAILSAFE = False
+        
+        # Get screen size
+        width, height = pyautogui.size()
+        print(f"Screen size: {width}x{height}")
+        
+        # Test mouse movement
+        print("Moving mouse to top-left corner (0, 0)...")
+        pyautogui.moveTo(0, 0, duration=1)
+        print("Moving mouse to bottom-right corner...")
+        pyautogui.moveTo(width - 1, height - 1, duration=1)
+        print("Mouse test successful!")
+        
+    except Exception as e:
+        print(f"!!! PyAutoGUI test failed: {e}")
+        print("!!! It seems pyautogui is having trouble controlling the mouse.")
+    finally:
+        # Re-enable failsafe
+        pyautogui.FAILSAFE = True
+        print("--- Test Complete ---\n")
 
 
 def take_screenshot(filename: str = "screenshot.png") -> str:
