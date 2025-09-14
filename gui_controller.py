@@ -2,25 +2,32 @@ import pyautogui
 import google.generativeai as genai
 import PIL.Image
 
-def get_next_gui_action(user_prompt: str, screenshot_file: str) -> str:
+def get_next_gui_action(user_prompt: str, screenshot_file: str, history: list[str]) -> str:
     """
-    Analyzes a screenshot with a user prompt to determine the next GUI action.
+    Analyzes a screenshot with a user prompt and action history to determine the next GUI action.
 
     Args:
         user_prompt (str): The user's original request.
         screenshot_file (str): The path to the screenshot image.
+        history (list[str]): A list of the actions taken so far.
 
     Returns:
         str: A string representing the next action to take (e.g., "click(100, 200)").
     """
     model = genai.GenerativeModel('gemini-1.5-flash')
     
+    history_str = "\n".join(f"- {h}" for h in history)
+    
     prompt = f"""
     You are a helpful AI assistant that controls a computer.
     You are looking at a screenshot of the user's screen.
     The user's overall goal is: "{user_prompt}"
 
-    Based on the screenshot, what is the single next action you should take to progress towards the goal?
+    You have already taken the following actions:
+{history_str}
+
+    Based on the screenshot and your past actions, what is the single next action you should take to progress towards the goal?
+    If you believe the goal is complete, use the done() action. Do not repeat actions that did not work.
 
     Your available actions are:
     1. click(x, y): Click a specific coordinate on the screen.
@@ -28,9 +35,7 @@ def get_next_gui_action(user_prompt: str, screenshot_file: str) -> str:
     3. press("key"): Press a special key on the keyboard (e.g., "enter", "win", "esc").
     4. done(): Use this when the user's goal has been fully achieved.
 
-    Analyze the screenshot and return ONLY the single command for the next action.
-    Do not provide any explanation or conversational text.
-    For example, if you need to click on a button at coordinates x=123, y=456, you should return: click(123, 456)
+    Analyze the screenshot and your action history, then return ONLY the single command for the next action.
     """
     
     try:
@@ -39,6 +44,7 @@ def get_next_gui_action(user_prompt: str, screenshot_file: str) -> str:
         return response.text.strip()
     except Exception as e:
         return f"Error analyzing screenshot: {e}"
+
 
 def execute_gui_action(action_string: str) -> bool:
     """

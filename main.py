@@ -82,6 +82,7 @@ if __name__ == "__main__":
             gui_task = action.get("command", "")
             print(f"Executing GUI task: {gui_task}")
             
+            action_history = []
             # Start the Observe, Think, Act loop for GUI tasks
             while True:
                 time.sleep(1) # Wait a moment for the screen to settle
@@ -91,7 +92,8 @@ if __name__ == "__main__":
                     break
                 
                 # Think: What is the next action?
-                next_action_str = get_next_gui_action(gui_task, screenshot_file)
+                next_action_str = get_next_gui_action(gui_task, screenshot_file, action_history)
+                action_history.append(next_action_str)
                 
                 # Act: Execute the action
                 should_continue = execute_gui_action(next_action_str)
