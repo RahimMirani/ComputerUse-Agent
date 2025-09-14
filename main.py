@@ -3,7 +3,8 @@ import os
 import google.generativeai as genai
 from dotenv import load_dotenv
 import json
-from gui_controller import take_screenshot, get_next_gui_action
+import time
+from gui_controller import take_screenshot, get_next_gui_action, execute_gui_action
 
 # Load environment variables from .env file
 load_dotenv()
@@ -82,12 +83,20 @@ if __name__ == "__main__":
             print(f"Executing GUI task: {gui_task}")
             
             # Start the Observe, Think, Act loop for GUI tasks
-            screenshot_file = take_screenshot()
-            if screenshot_file:
+            while True:
+                time.sleep(1) # Wait a moment for the screen to settle
+                screenshot_file = take_screenshot()
+                if not screenshot_file:
+                    print("Failed to take screenshot. Aborting GUI task.")
+                    break
+                
                 # Think: What is the next action?
-                next_action = get_next_gui_action(gui_task, screenshot_file)
-                print(f"LLM wants to: {next_action}")
-                # In the next step, we will actually execute this action.
+                next_action_str = get_next_gui_action(gui_task, screenshot_file)
+                
+                # Act: Execute the action
+                should_continue = execute_gui_action(next_action_str)
+                if not should_continue:
+                    break # The LLM signaled that the task is done
             
         elif action.get("type") == "ERROR":
             print(f"Error: {action.get('command')}")

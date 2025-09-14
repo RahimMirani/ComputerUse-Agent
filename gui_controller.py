@@ -40,6 +40,42 @@ def get_next_gui_action(user_prompt: str, screenshot_file: str) -> str:
     except Exception as e:
         return f"Error analyzing screenshot: {e}"
 
+def execute_gui_action(action_string: str) -> bool:
+    """
+    Parses an action string from the LLM and executes it using pyautogui.
+
+    Args:
+        action_string (str): The command from the LLM (e.g., "click(100, 200)").
+
+    Returns:
+        bool: True if the action loop should continue, False if the action was "done()".
+    """
+    action_string = action_string.strip()
+    print(f"Executing action: {action_string}")
+
+    try:
+        if action_string.lower().startswith("click"):
+            # A bit of parsing to extract coordinates. This can be made more robust.
+            coords_str = action_string[action_string.find("(")+1:action_string.find(")")]
+            x, y = map(int, coords_str.split(','))
+            pyautogui.click(x, y)
+        elif action_string.lower().startswith("type"):
+            text_to_type = action_string[action_string.find("(")+1:action_string.find(")")].strip('"\'')
+            pyautogui.typewrite(text_to_type, interval=0.1)
+        elif action_string.lower().startswith("press"):
+            key_to_press = action_string[action_string.find("(")+1:action_string.find(")")].strip('"\'')
+            pyautogui.press(key_to_press)
+        elif action_string.lower() == "done()":
+            print("Task complete.")
+            return False # Signal to stop the loop
+        else:
+            print(f"Unknown action: {action_string}")
+    
+    except Exception as e:
+        print(f"Error executing action '{action_string}': {e}")
+
+    return True # Signal to continue the loop
+
 
 def take_screenshot(filename: str = "screenshot.png") -> str:
     """
