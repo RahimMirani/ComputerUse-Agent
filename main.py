@@ -66,7 +66,7 @@ def execute_command(command: str) -> str:
 
 if __name__ == "__main__":
     # Run a quick test to see if we can control the mouse
-    test_mouse_control()
+    #test_mouse_control()
 
     while True:
         user_input = input("Hello, how can I help you today? ")
